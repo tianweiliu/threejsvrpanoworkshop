@@ -13,47 +13,47 @@
 		<script src="js/three.js"></script>
 		<script src="js/GLTFLoader.js"></script>
 		<script>
-      // I am a single-line comment
-      /* I am a multi-line comment.
-      Everything will be comment until */
-
+			// I am a single-line comment
+			/* I am a multi-line comment.
+			Everything will be comment until */
+			
 			// Our Javascript will go here.
 
-      /* ==========================================
-              Three.js needs to be initialized
-         ========================================== */
-      // Note: Check here if you want to learn more: https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene
+			/* ==========================================
+			      Three.js needs to be initialized
+			 ========================================== */
+			// Note: Check here if you want to learn more: https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene
 
-      // Create a scene and store this scene object as variable "scene"
-      var scene = new THREE.Scene();
+			// Create a scene and store this scene object as variable "scene"
+			var scene = new THREE.Scene();
 
-      // Create a perspective camera and set to:
-      //   a. 75 degree FOV (Field of view)
-      //   b. Aspect ratio as screen width divided by screen height (since the entire screen is our canvas)
-      //   c. 0.1 unit near clipping
-      //   d. 1000 unit far clipping
-      //   (note: objects further away from the camera than the value of far or closer than near won't be rendered)
-      // and store this camera object as variable "camera"
-      var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+			// Create a perspective camera and set to:
+			//   a. 75 degree FOV (Field of view)
+			//   b. Aspect ratio as screen width divided by screen height (since the entire screen is our canvas)
+			//   c. 0.1 unit near clipping
+			//   d. 1000 unit far clipping
+			//   (note: objects further away from the camera than the value of far or closer than near won't be rendered)
+			// and store this camera object as variable "camera"
+			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 			// Set the "camera"'s z axis position to 5.8 unit (Note that the initial position will be 0, 0, 0 that's why x and y are not set)
 			camera.position.z = 5.8;
 
-      // Create a WebGL renderer and store this renderer as variable "renderer"
-      var renderer = new THREE.WebGLRenderer();
+			// Create a WebGL renderer and store this renderer as variable "renderer"
+			var renderer = new THREE.WebGLRenderer();
 
 			// These are recommended gamma settings
 			renderer.gammaOutput = true;
 			renderer.gammaFactor = 2.2;
 
-      // Render in full screen size
-      renderer.setSize( window.innerWidth, window.innerHeight );
+			// Render in full screen size
+			renderer.setSize( window.innerWidth, window.innerHeight );
 
-      // Add render to the page(body)
-      document.body.appendChild( renderer.domElement );
+			// Add render to the page(body)
+			document.body.appendChild( renderer.domElement );
 
-      /* ==========================================
-                  Let the magic begin!
-         ========================================== */
+			/* ==========================================
+				  Let the magic begin!
+			 ========================================== */
 
 			// Original tutorial for the earth and lights here: http://blog.mastermaps.com/2013/09/creating-webgl-earth-with-threejs.html
 
@@ -106,9 +106,9 @@
 				// this is the callback function, this function will be called after the 3d model is loaded and conveniently passed the loaded object as an argument.
 				shuttle = gltf.scene.children[0];
 				/* ==========================================
-											Do you like MATH?
-								Time to get disorientated in 3D!
-					 ========================================== */
+						Do you like MATH?
+					Time to get disorientated in 3D!
+				========================================== */
 				// TODO:
 				// Knowing that the shuttle will be loaded facing towards the camera
 				// What rotation do we put in to the make shuttle point to the top left corner of the screen with the back facing the camera,
@@ -132,9 +132,9 @@
 			});
 
 			/* ==========================================
-                    User Interaction!
-				    I know you all been waiting for this.
-         ========================================== */
+					User Interaction!
+				I know you all been waiting for this.
+			========================================== */
 			// To make our code respond to user input, we register "listeners" to the browser so the browser can give us a call when the user does something we want to respond to.
 			// We need to register the "keydown" event on document so we get a call when user presses any key down.
 			document.addEventListener( 'keydown', ( event ) => {
@@ -173,9 +173,9 @@
 						break;
 
 					/* ==========================================
-													Adventure Time!
-								 What else can the user interact with?
-						 ========================================== */
+							Adventure Time!
+						What else can the user interact with?
+					========================================== */
 					// TODO:
 					// Select some inputs you like, make something happen! You guys are the designers!
 				}
@@ -200,9 +200,9 @@
 				}
 
 				/* ==========================================
-												Adventure Time!
-							 Can you pass a Technical Interview?
-					 ========================================== */
+						Adventure Time!
+					Can you pass a Technical Interview?
+				========================================== */
 				// TODO:
 				// Q: Knowing that:
 				//   a. To move the `shuttle` to the left for one unit on x axis, you set "shuttle.position.x = shuttle.position.x - 1;"
