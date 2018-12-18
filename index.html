@@ -2,13 +2,16 @@
 <html>
 	<head>
 		<meta charset=utf-8>
-		<title>NVA</title>
+		<title>Introduction to three.js</title>
 		<style>
+			* {box-sizing: border-box; overflow: hidden;}
 			body { margin: 0; }
 			canvas { width: 100%; height: 100% }
+			iframe { position: absolute; right: 10px; top: 10px; width: 640px; height: 360px; border: 1px solid #FFF; }
 		</style>
 	</head>
 	<body>
+		<iframe src="result.html"></iframe>
 		<script src="js/three.js"></script>
 		<script src="js/GLTFLoader.js"></script>
 		<script>
@@ -21,6 +24,7 @@
       /* ==========================================
               Three.js needs to be initialized
          ========================================== */
+      // Note: Check here if you want to learn more: https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene
 
       // Create a scene and store this scene object as variable "scene"
       var scene = new THREE.Scene();
@@ -50,47 +54,52 @@
       document.body.appendChild( renderer.domElement );
 
       /* ==========================================
-                  Let the magic begin
+                  Let the magic begin!
          ========================================== */
 
-			// Earth
-			// Original tutorial here: http://blog.mastermaps.com/2013/09/creating-webgl-earth-with-threejs.html
+			// Original tutorial for the earth and lights here: http://blog.mastermaps.com/2013/09/creating-webgl-earth-with-threejs.html
 
+			/* Earth */
 			// Create a SphereGeometry (set as 5 radius, 20 horizontal segaments, 20 vertical segaments) and store this object as "earthGeometry"
-			var earthGeometry = new THREE.SphereBufferGeometry( 5, 32, 32 );
+
 			// Load a texture image from file and store this object as "earthTexture"
-			var earthTexture = new THREE.TextureLoader().load('assets/earth/earth.jpg');
+
 			// Create a MeshBasicMaterial and set the texture map to be "earthTexture", and then store the object as "earthMaterial"
-			var earthMaterial = new THREE.MeshPhongMaterial( { map : earthTexture, transparent: true } );
+
 			// Create a Mesh using "earthGeometry" and "earthMaterial" and store the object as "earth"
-			var earth = new THREE.Mesh( earthGeometry, earthMaterial );
+			var earth = null;
 			// Not adding to scene here as we will be adding the earth to an anchor object with the sunlight so they can rotate together.
 
-			// Sun
+			/* Sun */
 			// Create a soft white directional light to simulate sun light
 			var sunlight = new THREE.DirectionalLight( 0x404040, 4 );
 			// We set the sunlight position to ( 5, 3, 5 ) to simulate the tilted earth axis
 			sunlight.position.set( 5, 3, 5 );
 			// Not adding to scene here as we will be adding the sunlight to an anchor object with the earth so they can rotate together.
 
+			/* Ambient Light */
 			// This is a soft ambient light to simulate moon reflection and etc.
 			var light = new THREE.AmbientLight( 0x404040, 0.05 );
+			// Add `light` to `scene` since ambient doesn't have a direction, so it does not need to be rotated with the group
 			scene.add( light );
 
-			// Group
+			/* Group */
 			// Although not scientifically correct, to make it easy, we are grouping together earth and sun light so they turn together to simulate the effect that the space shuttle is orbiting the earth.
 			var earthAndSun = new THREE.Group();
-			earthAndSun.add( earth );
-			earthAndSun.add( sunlight );
-			earthAndSun.rotation.z = Math.PI * 0.2;
+			// Add the `earth` we created earlier to `earthAndSun` instead of `scene` so they move together
+			if ( earth ) {
+				earthAndSun.add( earth );
+			}
+			// Add the `sunlight` we created earlier to `earthAndSun` instead of `scene` so they move together
+			if ( sunlight ) {
+				earthAndSun.add( sunlight );
+			}
+			// We are turning the whole `earthAndSun` group 23.4 degrees to simulate the earth rotation axis
+			earthAndSun.rotation.z = Math.PI * 0.13;
+			// Now we can add the whole group to the `scene`
 			scene.add( earthAndSun );
 
-      /* ==========================================
-                    Adventure Time!
-         ========================================== */
-      // TODO: Play around with the settings here, make it bigger, make it smaller, make less segaments, change the texture, save it and refresh the page. Voila!
-
-			// shuttle
+			/* shuttle */
 			var shuttle = null;
 			// We are initiating an object to store the angular velocity, and this object will be modified after each user input, so we can keep track of how fast the shuttle is spinning.
 			var shuttleAngularVelocity = {
@@ -98,14 +107,10 @@
 				y: 0,
 				z: 0
 			};
-			new THREE.GLTFLoader().load( 'assets/spaceshuttle/scene.gltf', function ( gltf ) {
-				// this is a callback function, because loading the model is async, we want the browser to continue work here after it is loaded.
+			// Now we are loading the 3d model file, but it is done asynchronously so the loading process does not freeze your browser, but we cannot manupilate the object until is loaded, that's why we need a callback function to let us know that the loading is done.
+			new THREE.GLTFLoader().load( 'assets/spaceshuttle/scene.gltf', ( gltf ) => {
+				// this is the callback function, this function will be called after the 3d model is loaded and conveniently passed the loaded object as an argument.
 				shuttle = gltf.scene.children[0];
-				// This scale looks good.
-				shuttle.scale.set( 0.005, 0.005, 0.005 );
-				// This position looks good. Don't ask me why.
-				shuttle.position.z = 5.1;
-				// Rotate the shuttle to the proper angle (idean radian) (Math.PI is 180 degrees)
 				/* ==========================================
 						 					Do you like MATH?
 								Time to get disorientated in 3D!
@@ -114,83 +119,73 @@
 				// Knowing that the shuttle will be loaded facing towards the camera
 				// What rotation do we put in to the make shuttle point to the top left corner of the screen with the back facing the camera,
 				// so it looks like the shuttle is flying towards the top left corner?
-				shuttle.rotation.x = Math.PI; // 180
-				shuttle.rotation.y = Math.PI; // 180
-				shuttle.rotation.z = 0.35 * Math.PI; // 63
+
+				// Set the scale of the model
+
+				// Set the position of the model
+
+				// Rotate the shuttle to the proper angle (in radian) (Math.PI is 180 degrees)
+
 				// Don't forget to add the "shuttle" to the "scene".
 				scene.add( shuttle );
-			},  function ( xhr ) {
+			},  ( xhr ) => {
 				// Report 3d model loading progress here
-			}, function ( error ) {
+			}, ( error ) => {
 				// Report 3d model loading error here
 				console.error( error );
 			});
 
+			/* ==========================================
+                    User Interaction!
+				    I know you all been waiting for this.
+         ========================================== */
+			// To make our code respond to user input, we register "listeners" to the browser so the browser can give us a call when the user does something we want to respond to.
 			// We need to register the "keydown" event on document so we get a call when user presses any key down.
-			document.addEventListener( 'keydown', function( event ) {
-				// this is another usage of callback function is that we do not know when an event will happen and we want to do something only after such event, which is called a "listener".
-				// this is a switch block, often used for listing out different stuff to do for differernt conditions
+			document.addEventListener( 'keydown', ( event ) => {
+				// this is another usage of callback function. Because we do not know when a user input will happen and we only want to do something after such user input, so we earlier registered with our browser that we want the browser to call this function when `keydown` happens
 				switch ( event.key ) {
+					// this is a switch block, often used for listing out different stuff to do for differernt condition
 					case "a":
 						// Key "a" is pressed down
 						// roll to the left
-						shuttleAngularVelocity.y += 0.01;
 						break;
-					case "d":
-						// Key "d" is pressed down
-						// roll to the right
-						shuttleAngularVelocity.y -= 0.01;
-						break;
-					case "w":
-						// Key "w" is pressed down
-						// pitch down
-						shuttleAngularVelocity.x += 0.01;
-						break;
-					case "s":
-						// Key "s" is pressed up
-						// pitch up
-						shuttleAngularVelocity.x -= 0.01;
-						break;
-					case "q":
-						// Key "q" is pressed down
-						// yaw to the left
-						shuttleAngularVelocity.z += 0.01;
-						break;
-					case "e":
-						// Key "e" is pressed down
-						// yaw to the right
-						shuttleAngularVelocity.z -= 0.01;
-						break;
+					/* ==========================================
+													Adventure Time!
+								 What else can the user interact with?
+						 ========================================== */
+					// TODO:
+					// Select some inputs you like, make something happen! You guys are the designers!
 				}
 			}, false );
 
+			// We can even store a function inside a variable, next time we write `animate()`, this function will be called.
 			var animate = function () {
 				// Tell the browser that I want the function "animate" to be called again the next frame
 				requestAnimationFrame( animate );
 
 				if ( earthAndSun ) {
-					// Rotate the "earthAndSun" 0.0001 degree around y and z axis every frame
-					earthAndSun.rotation.y += Math.PI * 0.0001;
-					earthAndSun.rotation.z += Math.PI * 0.0001;
+					// Rotate the `earthAndSun` 0.0001 degree around y and z axis every frame if `earthAndSun` exists.
 				}
 
 				if ( shuttle ) {
-					shuttle.rotateOnAxis(new THREE.Vector3(1, 0, 0), shuttleAngularVelocity.x);
-					shuttle.rotateOnAxis(new THREE.Vector3(0, 1, 0), shuttleAngularVelocity.y);
-					shuttle.rotateOnAxis(new THREE.Vector3(0, 0, 1), shuttleAngularVelocity.z);
+					// Rotate the `shuttle` based on its angular velocity locally if `shuttle` exists, remember: `async`!
 				}
 
 				/* ==========================================
-						 Adventure Time! (Technical Interview)
+												Adventure Time!
+							 Can you pass a Technical Interview?
 					 ========================================== */
+				// TODO:
 				// Q: Knowing that:
-				//   a. To move the cube to the left for one unit on x axis, you set "cube.position.x = cube.position.x - 1;"
-				//   b. To move the cube to the right for one unit on x axis, you set "cube.position.x = cube.position.x + 1;"
+				//   a. To move the `shuttle` to the left for one unit on x axis, you set "shuttle.position.x = shuttle.position.x - 1;"
+				//   b. To move the `shuttle` to the right for one unit on x axis, you set "shuttle.position.x = shuttle.position.x + 1;"
 				//   c. "Math.random()" returns a random number between 0 (inclusive) and 1 (exclusive);
-				// How do you make the cube dance around the screen?
+				// How do you make the shuttle move around the screen?
 				// (Extra credit) How do you make the cube bounce left and right?
 				//
 				// A: Write your code here:
+
+
 
 				// Tell the "renderer" to render a new image of the "scene", from "camera"
 				renderer.render( scene, camera );

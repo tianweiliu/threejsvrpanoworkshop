@@ -12,10 +12,13 @@ Here are couple to get you started for Javascript:
 
 [Boilerplate code](https://en.wikipedia.org/wiki/Boilerplate_code) is just some code snippets that contain reusable but important code so we don't need to write the same thing agin when we start another project. For example, the goal for this workshop is not for you to understand how to write a HTML5 webpage from scratch nor how to properly initialize Three.js. So all those code will be provided to you so we can finish the workshop in one year.
 
-Simply just download the zip [here] (https://github.com/TGTLabs/threejsworkshop/archive/master.zip), and unzip it to any place you like. Don't worry, it does not contain any virus nor ransomware as far as I know.
-
-Or use the fancy `git clone git@github.com:TGTLabs/threejsworkshop.git` if you like to see texts flowing on your Terminal like a hacker in the movie. However, make sure you have `git` installed and credentials all set up for your GitHub. Vote for another workshop or offer me a beer if you are interested in how we engineers mess up others' code with some simple commands and end up in a fist fight. #versioncontrol
+1. Simply just download the zip [here] (https://github.com/TGTLabs/threejsworkshop/archive/master.zip), and unzip it to any place you like. Don't worry, it does not contain any virus nor ransomware as far as I know.
+Or use the fancy `git clone git@github.com:TGTLabs/threejsworkshop.git` if you like to see texts flowing on your Terminal like a hacker in the movie. However, make sure you have `git` installed and credentials all set up for your GitHub. Vote for another workshop or offer me a beer if you are interested in how we engineers mess up others' code with some simple commands and end up in a fist fight.
 ![#versioncontrol](https://i.redd.it/05b6u19pseoz.png)
+
+2. Replace `/assets/spaceshuttle/textures/Material_197_baseColor.jpg` with your own.
+
+3. Finally open `index.html` in the IDE you chose to use.
 
 ## 3. Run `python -m SimpleHTTPServer`
 
