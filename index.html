@@ -2,196 +2,76 @@
 <html>
 	<head>
 		<meta charset=utf-8>
-		<title>Introduction to three.js</title>
+		<title>Introduction to three.js VR</title>
 		<style>
 			* {box-sizing: border-box; overflow: hidden;}
 			body { margin: 0; }
 			canvas { width: 100%; height: 100% }
-			iframe { position: absolute; right: 10px; top: 10px; width: 640px; height: 360px; border: 1px solid #FFF; }
 		</style>
 	</head>
 	<body>
-		<iframe src="result.html"></iframe>
-		<script src="js/three.js"></script>
-		<script src="js/GLTFLoader.js"></script>
-		<script>
-			// I am a single-line comment
-			/* I am a multi-line comment.
-			Everything will be comment until */
+		<script type="module">
+			import * as THREE from 'https://unpkg.com/three//build/three.module.js';
 
-			// Our Javascript will go here.
+			// import this to use mouse to control camera
+			import { OrbitControls } from 'https://unpkg.com/three/examples/jsm/controls/OrbitControls.js';
+			
+			// import this to use WebXR's VR mode
+			import { VRButton } from 'https://unpkg.com/three/examples/jsm/webxr/VRButton.js';
 
-			/* ==========================================
-				Three.js needs to be initialize
-			========================================== */
-			// Note: Check here if you want to learn more: https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene
-
-			// Create a scene and store this scene object as variable "scene"
 			var scene = new THREE.Scene();
 
-			// Create a perspective camera and set to:
-			//   a. 75 degree FOV (Field of view)
-			//   b. Aspect ratio as screen width divided by screen height (since the entire screen is our canvas)
-			//   c. 0.1 unit near clipping
-			//   d. 1000 unit far clipping
-			//   (note: objects further away from the camera than the value of far or closer than near won't be rendered)
-			// and store this camera object as variable "camera"
-			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-			// Set the "camera"'s z axis position to 5.8 unit (Note that the initial position will be 0, 0, 0 that's why x and y are not set)
-			camera.position.z = 5.8;
+			var camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 2000 );
+			camera.position.z = 0.1; // Move camera off center a little bit to allow OrbitControls to work
 
-			// Create a WebGL renderer and store this renderer as variable "renderer"
 			var renderer = new THREE.WebGLRenderer();
+			
+			// Enable WebXR support
+			renderer.xr.enabled = true;
+			renderer.xr.setReferenceSpaceType( 'local' );
 
-			// These are recommended gamma settings
-			renderer.gammaOutput = true;
-			renderer.gammaFactor = 2.2;
-
-			// Render in full screen size
+			renderer.setPixelRatio( window.devicePixelRatio );
 			renderer.setSize( window.innerWidth, window.innerHeight );
-
-			// Add render to the page(body)
 			document.body.appendChild( renderer.domElement );
 
-			/* ==========================================
-					Let the magic begin!
-			 ========================================== */
+			// Initiate VRButton.js (three.js's WebXR(VR) support lib)
+			document.body.appendChild( VRButton.createButton( renderer ) );
 
-			// Original tutorial for the earth and lights here: http://blog.mastermaps.com/2013/09/creating-webgl-earth-with-threejs.html
+			// Initiate OrbitControls
+			var controls = new OrbitControls( camera, renderer.domElement );
 
-			/* Earth */
-			// Create a SphereGeometry (set as 5 radius, 20 horizontal segaments, 20 vertical segaments) and store this object as "earthGeometry"
+			var panoSphereGeo = new THREE.SphereBufferGeometry( 6, 256, 256 );
+			var panoSphereMat = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+			var panoSphereTex = new THREE.TextureLoader().load('assets/pano/kandao3.jpg');
+			panoSphereTex.minFilter = THREE.NearestFilter;
+			panoSphereTex.generateMipmaps = false;
+			var panoSphereDep = new THREE.TextureLoader().load('assets/pano/kandao3_depthmap.jpg');
+			panoSphereDep.minFilter = THREE.NearestFilter;
+			panoSphereDep.generateMipmaps = false;
+			var panoSphereMat = new THREE.MeshBasicMaterial( {
+					side: THREE.BackSide,
+					displacementScale: - 4.0,
+					map: panoSphereTex,
+					displacementMap: panoSphereDep
+				} );
+			var sphere = new THREE.Mesh( panoSphereGeo, panoSphereMat );
+			scene.add(sphere);
 
-			// Load a texture image from file and store this object as "earthTexture"
-
-			// Create a MeshBasicMaterial and set the texture map to be "earthTexture", and then store the object as "earthMaterial"
-
-			// Create a Mesh using "earthGeometry" and "earthMaterial" and store the object as "earth"
-			var earth = null;
-			// Not adding to scene here as we will be adding the earth to an anchor object with the sunlight so they can rotate together.
-
-			/* Sun */
-			// Create a soft white directional light to simulate sun light
-			var sunlight = new THREE.DirectionalLight( 0x404040, 4 );
-			// We set the sunlight position to ( 5, 3, 5 ) to simulate the tilted earth axis
-			sunlight.position.set( 5, 3, 5 );
-			// Not adding to scene here as we will be adding the sunlight to an anchor object with the earth so they can rotate together.
-
-			/* Ambient Light */
-			// This is a soft ambient light to simulate moon reflection and etc.
-			var light = new THREE.AmbientLight( 0x404040, 0.05 );
-			// Add `light` to `scene` since ambient doesn't have a direction, so it does not need to be rotated with the group
+			var light = new THREE.AmbientLight( 0xffffff, 1 );
 			scene.add( light );
 
-			/* Group */
-			// Although not scientifically correct, to make it easy, we are grouping together earth and sun light so they turn together to simulate the effect that the space shuttle is orbiting the earth.
-			var earthAndSun = new THREE.Group();
-			// Add the `earth` we created earlier to `earthAndSun` instead of `scene` so they move together
-			if ( earth ) {
-				earthAndSun.add( earth );
-			}
-			// Add the `sunlight` we created earlier to `earthAndSun` instead of `scene` so they move together
-			if ( sunlight ) {
-				earthAndSun.add( sunlight );
-			}
-			// We are turning the whole `earthAndSun` group 23.4 degrees to simulate the earth rotation axis
-			earthAndSun.rotation.z = Math.PI * 0.13;
-			// Now we can add the whole group to the `scene`
-			scene.add( earthAndSun );
-
-			/* shuttle */
-			var shuttle = null;
-			// We are initiating an object to store the angular velocity, and this object will be modified after each user input, so we can keep track of how fast the shuttle is spinning.
-			var shuttleAngularVelocity = {
-				x: 0,
-				y: 0,
-				z: 0
-			};
-			// Now we are loading the 3d model file, but it is done asynchronously so the loading process does not freeze your browser, but we cannot manupilate the object until is loaded, that's why we need a callback function to let us know that the loading is done.
-			new THREE.GLTFLoader().load( 'assets/spaceshuttle/scene.gltf', ( gltf ) => {
-				// this is the callback function, this function will be called after the 3d model is loaded and conveniently passed the loaded object as an argument.
-				shuttle = gltf.scene.children[0];
-				/* ==========================================
-						Do you like MATH?
-					Time to get disorientated in 3D!
-				========================================== */
-				// TODO:
-				// Knowing that the shuttle will be loaded facing towards the camera
-				// What rotation do we put in to the make shuttle point to the top left corner of the screen with the back facing the camera,
-				// so it looks like the shuttle is flying towards the top left corner?
-
-				// Set the scale of the model
-
-				// Set the position of the model
-
-				// Rotate the shuttle to the proper angle (in radian) (Math.PI is 180 degrees)
-
-				// Don't forget to add the "shuttle" to the "scene".
-				scene.add( shuttle );
-			},  ( xhr ) => {
-				// Report 3d model loading progress here
-			}, ( error ) => {
-				// Report 3d model loading error here
-				console.error( error );
-			});
-
-			/* ==========================================
-				    User Interaction!
-			     I know you all been waiting for this.
-			 ========================================== */
-			// To make our code respond to user input, we register "listeners" to the browser so the browser can give us a call when the user does something we want to respond to.
-			// We need to register the "keydown" event on document so we get a call when user presses any key down.
-			document.addEventListener( 'keydown', ( event ) => {
-				// this is another usage of callback function. Because we do not know when a user input will happen and we only want to do something after such user input, so we earlier registered with our browser that we want the browser to call this function when `keydown` happens
-				switch ( event.key ) {
-					// this is a switch block, often used for listing out different stuff to do for differernt condition
-					case "a":
-						// Key "a" is pressed down
-						// roll to the left
-						break;
-					/* ==========================================
-							Adventure Time!
-						What else can the user interact with?
-					========================================== */
-					// TODO:
-					// Select some inputs you like, make something happen! You guys are the designers!
+			var render = function () {
+				// if not in XR(VR) mode, use OrbitControls to control camera
+				if (renderer.xr.isPresenting === false) {
+					controls.update();
 				}
-			}, false );
-
-			// We can even store a function inside a variable, next time we write `animate()`, this function will be called.
-			var animate = function () {
-				// Tell the browser that I want the function "animate" to be called again the next frame
-				requestAnimationFrame( animate );
-
-				if ( earthAndSun ) {
-					// Rotate the `earthAndSun` 0.0001 degree around y and z axis every frame if `earthAndSun` exists.
-				}
-
-				if ( shuttle ) {
-					// Rotate the `shuttle` based on its angular velocity locally if `shuttle` exists, remember: `async`!
-				}
-
-				/* ==========================================
-						Adventure Time!
-					Can you pass a Technical Interview?
-				========================================== */
-				// TODO:
-				// Q: Knowing that:
-				//   a. To move the `shuttle` to the left for one unit on x axis, you set "shuttle.position.x = shuttle.position.x - 1;"
-				//   b. To move the `shuttle` to the right for one unit on x axis, you set "shuttle.position.x = shuttle.position.x + 1;"
-				//   c. "Math.random()" returns a random number between 0 (inclusive) and 1 (exclusive);
-				// How do you make the shuttle move around the screen?
-				// (Extra credit) How do you make the cube bounce left and right?
-				//
-				// A: Write your code here:
-
-
-
-				// Tell the "renderer" to render a new image of the "scene", from "camera"
 				renderer.render( scene, camera );
 			};
 
-			// Call "animate" for the first time.
+			var animate = function () {
+				renderer.setAnimationLoop( render );
+			};
+
 			animate();
 		</script>
 	</body>
